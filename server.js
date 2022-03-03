@@ -13,8 +13,28 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("server connected");
+    console.log("server working");
+    startup();
 
-
-    //  connection.end();//
 });
+
+function startup() {
+    inquirer
+        .prompt({
+            type: "list",
+            choices: [
+                "Add department",
+                "Add role",
+                "Add employee",
+                "View departments",
+                "View Roles",
+                "View employees",
+                "Update employee role",
+                "Quit",
+            ],
+            message: "what would you like to do?",
+            name: "option"
+        })
+}
+
+startup();
