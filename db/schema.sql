@@ -2,29 +2,35 @@ DROP DATABASE IF EXISTS employee_tracker_db;
 
 CREATE DATABASE employee_tracker_db;
 
-USE employee_tracker_db;
+USE employee_tracker_db; 
 
 CREATE TABLE department (
+    
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    
 
-id INT NOT NULL AUTO_INCREMENT,
-
-name VARCHAR(50) NOT NULL,
-
-PRIMARY KEY (id)
-
+    name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE role (
-
-id INT NOT NULL AUTO_INCREMENT,
-
-title VARCHAR(30) NOT NULL,
-
-salary DECIMAL NOT NULL,
-
-department_id INT NOT NULL,
-
-PRIMARY KEY (id)
+    
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    
+    title VARCHAR(30) NOT NULL, 
+    
+    salary DECIMAL NOT NULL,
+    
+    department_id INTEGER, 
+    
+    INDEX dep_ind (department_id),
+    
+    CONSTRAINT fk_department 
+    
+    FOREIGN KEY (department_id) 
+    
+    REFERENCES department(id) 
+    
+    ON DELETE SET NULL
 
 );
 
@@ -43,3 +49,4 @@ manager_id INT NULL,
 PRIMARY KEY (id)
 
 );
+
