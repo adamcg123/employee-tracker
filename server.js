@@ -186,7 +186,6 @@ function addEmployee() {
             });
         });
 };
-
 function addDepartment() {
     inquirer
         .prompt([
@@ -210,7 +209,6 @@ function addDepartment() {
             })
         })
 };
-
 function addRole() {
     connection.query('SELECT * FROM department', function (err, res) {
         if (err) throw err;
@@ -263,7 +261,6 @@ function addRole() {
             })
     })
 };
-
 // update a role in the database
 function updateRole() {
     connection.query('SELECT * FROM employee', (err, res) => {
@@ -308,10 +305,34 @@ function updateRole() {
         });
     });
 };
-
 //  delete an employee
 function deleteEmployee() {
+    connection.query('SELECT * FROM employee', (err, res) => {
+        if (err) console.log(err);
+        const employees = res.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    name: 'delEmp',
+                    message: 'Select the employee you want to delete!',
+                    choices: employees,
+                },
 
+            ])
+            .then(delEmployee => {
+                const employee = delEmployee.delEmp;
+
+                const sql = `DELETE FROM employee WHERE id = ?`;
+
+                connection.query(sql, employee, (err, result) => {
+                    if (err) throw err;
+                    console.log("employee was successfully seleted!");
+
+                    viewEmployees();
+                });
+            });
+    });
 };
 
 function exitApp() {
