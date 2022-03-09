@@ -68,7 +68,11 @@ function startup() {
 };
 
 function viewEmployees() {
-    var query = 'SELECT * FROM employee';
+    var query = `SELECT employee.id, employee.first_name, employee.last_name, role.title AS Job, department.name AS departments, role.salary, CONCAT (manager.first_name, " ", manager.last_name) AS manager
+        FROM employee
+        LEFT JOIN role ON employee.role_id = role.id
+        LEFT JOIN department ON role.department_id = department.id
+        LEFT JOIN employee manager ON employee.manager_id = manager.id`;
     connection.query(query, function (err, res) {
         if (err) throw err;
         console.log(res.length + ' employees found total');
@@ -78,7 +82,8 @@ function viewEmployees() {
 };
 
 function viewDepartments() {
-    var query = 'SELECT * FROM department';
+    var query = `SELECT department.id,department.name AS department
+    FROM department`;
     connection.query(query, function (err, res) {
         if (err) throw err;
         console.table(res);
@@ -87,8 +92,10 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    var query = 'SELECT * FROM role';
-    connection.query(query, function (err, res) {
+    const sql = `SELECT role.id, role.title, role.salary, department.name AS department
+    FROM role
+    INNER JOIN department ON role.department_id = department.id`;
+    connection.query(sql, function (err, res) {
         if (err) throw err;
         console.table(res);
         startup();
@@ -152,13 +159,13 @@ function addEmployee() {
                             if (err) throw err;
 
                             const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
-                            const noManager = data.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+
                             inquirer.prompt([
                                 {
                                     type: 'list',
                                     name: 'manager',
                                     message: "Who is the employee's manager?",
-                                    choices: managers, noManager
+                                    choices: managers
 
                                 }
                             ])
@@ -259,7 +266,47 @@ function addRole() {
 
 // update a role in the database
 function updateRole() {
+    connection.query('SELECT * FROM employee', (err, res) => {
+        if (err) console.log(err);
+        const employees = res.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
 
+        connection.query('SELECT * FROM role', (err, res) => {
+            const roles = res.map(({ id, title, }) => ({ name: title + " ", value: id }));
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        name: 'employee',
+                        message: 'Select employee to update their role!',
+                        choices: employees,
+                    },
+                    {
+                        type: 'list',
+                        name: 'newRole',
+                        message: 'Select new employee role!',
+                        choices: roles,
+                    },
+                ])
+                .then((answer) => {
+                    connection.query('UPDATE employee SET ? WHERE ?',
+                        [
+                            {
+                                role_id: answer.newRole,
+                            },
+                            {
+                                id: answer.employee,
+                            },
+                        ],
+                        function (err) {
+                            if (err) throw err;
+                        }
+                    );
+                    console.log('Employee role was updated!');
+                    viewRoles();
+                });
+
+        });
+    });
 };
 
 //  delete an employee
